@@ -13,11 +13,12 @@ typedef struct {
   int wins;
 } Team;
 
-void InitializeTeams(Team team[], int _abbrLength, char array[][abbrLength]);
+void InitializeTeams(Team team[], int _abbrLength, char array[][_abbrLength]);
 int ArrayContains(int x, int array[], int length);
 void ShuffleArray(int array[], int length);
-void InitializeIntArray(int array[], int length);
+void InitializeIntArray(int array[], int length, int mode);
 void PrintIntArray(int array[], int length);
+void OrganizeMatches(int lenMatches, int matches[], int lenTeams, Team teams[]);
 
 int main() {
 
@@ -28,14 +29,13 @@ int main() {
 
 
   InitializeTeams(teams, abbrLength, teamNames);
-  InitializeIntArray(results, qtTeams);
-  InitializeIntArray(bets, qtTeams);
-  InitializeIntArray(matches, qtTeams);
+  InitializeIntArray(results, qtTeams, 0);
+  InitializeIntArray(bets, qtTeams, 0);
+  InitializeIntArray(matches, qtTeams, 1);
 
-  PrintIntArray(matches, qtTeams);
-  printf("\n\n");
   ShuffleArray(matches, qtTeams);
-  PrintIntArray(matches, qtTeams);
+
+  OrganizeMatches(qtTeams, matches, qtTeams, teams);
 
 
   return 0;
@@ -52,9 +52,28 @@ void InitializeTeams(Team* _teams, int columns, char _teamNames[][columns]) {
 
 }
 
-void InitializeIntArray(int _array[], int length) {
-  for(int i = 0; i < length; i++) {
-    _array[i] = i;
+void InitializeIntArray(int _array[], int length, int mode) {
+  switch (mode) {
+    case -1:
+      for(int i = 0; i < length; i++) {
+        _array[i] = -1;
+      }
+      break;
+    case 0:
+      for(int i = 0; i < length; i++) {
+        _array[i] = 0;
+      }
+      break;
+    case 1:
+      for(int i = 0; i < length; i++) {
+        _array[i] = i;
+      }
+      break;
+    default: {
+      for(int i = 0; i < length; i++) {
+        _array[i] = 0;
+      }
+    }
   }
 }
 
@@ -75,9 +94,7 @@ void ShuffleArray(int _array[], int length) {
 
   int i = 0, j = 0, usedValues[length], n, temp;
 
-  for(i = 0; i < length; i++) {
-    usedValues[i] = -1;
-  }
+  InitializeIntArray(usedValues, length, -1);
 
   srand(time(NULL));
 
@@ -100,4 +117,14 @@ void PrintIntArray(int _array[], int length) {
     printf("%d ", _array[i]);
   }
   printf("\n");
+}
+
+void OrganizeMatches(int lenMatches, int _matches[], int lenTeams, Team _teams[]) {
+  int i = 0;
+  for(i = 0; i < lenMatches; i+=2) {
+    _teams[_matches[i]].status = rand()%2;
+    _teams[_matches[i+1]].status = !_teams[_matches[i]].status;
+    printf("%s X %s : %d X %d\n", &_teams[_matches[i]].name, &_teams[_matches[i+1]].name, _teams[_matches[i]].status, _teams[_matches[i+1]].status);
+  }
+  system("PAUSE");
 }
