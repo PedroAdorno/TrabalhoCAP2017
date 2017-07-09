@@ -1,0 +1,43 @@
+#hometext h1 {
+  color: #9fad32;
+}
+
+#hometext p {
+  color: #155a77;
+  font-size: 20px;
+}
+
+#homeform {
+  position: absolute;
+  margin: 0;
+  width: 425px;
+  top: 25%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Dosis', sans-serif;
+  font-weight: 600;
+}
+
+#teams_fields {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-right: -50%;
+  width: 100px;
+  transform: translate(-50%, -50%);
+}
+
+#qt_teams {
+  position: absolute;
+  margin: 0;
+  left: 0;
+  top: 0;
+}
+
+#submit_teams {
+  position: absolute;
+  margin: 0;
+  right: -10px;
+  top: 0;
+}
