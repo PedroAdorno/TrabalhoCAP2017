@@ -14,12 +14,14 @@ typedef struct {
   int wins;
 } Team;
 
+int Power(int, int);
 void InitializeTeams(Team team[], int _abbrLength, char array[][_abbrLength]);
 int ArrayContains(int x, int array[], int length);
 void ShuffleStructArray(Team array[], int length);
 void InitializeIntArray(int array[], int length, int mode);
 void PrintIntArray(int array[], int length);
 void OrganizeMatches(int lenTeams, Team teams[], int round);
+void WriteHTML();
 
 int main() {
 
@@ -36,15 +38,26 @@ int main() {
   ShuffleStructArray(teams, qtTeams);
 
   OrganizeMatches(qtTeams, teams, 0);
+  WriteHTML();
 
 
   return 0;
 }
 
+int Power(int a, int x) {
+  int i = 0, result = 1;
+
+  for(i = 0; i < x; i++) {
+    result *= a;
+  }
+  return result;
+}
+
 
 //Initialize the array containing all Team structs, setting each team's name and wins count(also 0).
 void InitializeTeams(Team* _teams, int columns, char _teamNames[][columns]) {
-  for(int i = 0; i < qtTeams; i++) {
+  int i = 0;
+  for(i = 0; i < qtTeams; i++) {
     strcpy(_teams[i].name, _teamNames[i]);
     _teams[i].wins = 0;
   }
@@ -52,24 +65,25 @@ void InitializeTeams(Team* _teams, int columns, char _teamNames[][columns]) {
 }
 
 void InitializeIntArray(int _array[], int length, int mode) {
+  int i = 0;
   switch (mode) {
     case -1:
-      for(int i = 0; i < length; i++) {
+      for(i = 0; i < length; i++) {
         _array[i] = -1;
       }
       break;
     case 0:
-      for(int i = 0; i < length; i++) {
+      for(i = 0; i < length; i++) {
         _array[i] = 0;
       }
       break;
     case 1:
-      for(int i = 0; i < length; i++) {
+      for(i = 0; i < length; i++) {
         _array[i] = i;
       }
       break;
     default: {
-      for(int i = 0; i < length; i++) {
+      for(i = 0; i < length; i++) {
         _array[i] = 0;
       }
     }
@@ -77,9 +91,9 @@ void InitializeIntArray(int _array[], int length, int mode) {
 }
 
 int ArrayContains(int x, int _array[], int length) {
-  int contains = 0;
+  int i = 0, contains = 0;
 
-  for(int i = 0; i < length; i++) {
+  for(i = 0; i < length; i++) {
     if(_array[i] == x) {
       contains += 1;
     }
@@ -111,28 +125,29 @@ void ShuffleStructArray(Team _array[], int length) {
 }
 
 void PrintIntArray(int _array[], int length) {
-  for(int i = 0; i < length; i++) {
-    printf("%d ", _array[i]);
+  int i = 0;
+  for(i = 0; i < length; i++) {
+    //printf("%d ", _array[i]);
   }
-  printf("\n");
+  //printf("\n");
 }
 
 void OrganizeMatches(int lenTeams, Team _teams[], int _round) {
   int i = 0, j = 0, k= 0, randBoolean, isFirstTeam = 1;
 
-  printf("Round %d\n", _round+1);
+  //printf("Round %d\n", _round+1);
 
   for(k = 0; k < lenTeams; k++) {
     if(_round == 0) {
-      printf("%d %s X %s %d\n", _teams[k].wins, _teams[k].name, _teams[k+1].name, _teams[k+1].wins);
+      //printf("%d %s X %s %d\n", _teams[k].wins, _teams[k].name, _teams[k+1].name, _teams[k+1].wins);
       k++;
     } else {
       if(_teams[k].wins == _round) {
         if(isFirstTeam) {
-          printf("%d %s X ", _teams[k].wins, _teams[k].name);
+          //printf("%d %s X ", _teams[k].wins, _teams[k].name);
           isFirstTeam = !isFirstTeam;
         } else {
-          printf("%s %d\n", _teams[k].name, _teams[k].wins);
+          //printf("%s %d\n", _teams[k].name, _teams[k].wins);
           isFirstTeam = !isFirstTeam;
         }
       }
@@ -140,20 +155,43 @@ void OrganizeMatches(int lenTeams, Team _teams[], int _round) {
   }
 
 
-    for(i = 0; i < lenTeams; i+=pow(2, _round+1)) {
+    for(i = 0; i < lenTeams; i+=Power(2, _round+1)) {
       randBoolean = rand()%2;
-      for(j = 0; j < pow(2, _round+1); j++) {
+      for(j = 0; j < Power(2, _round+1); j++) {
         if(_teams[i+j].wins == _round) {
           _teams[i+j].wins += randBoolean;
           randBoolean = !randBoolean;
         }
       }
     }
-    printf("\n\n");
+    //printf("\n\n");
 
 
     _round++;
     system("PAUSE");
-    OrganizeMatches(lenTeams, _teams, _round);
 
+}
+
+void WriteHTML() {
+  printf("%s%c%c\n","Content-Type:text/html;charset=UTF-8",13,10);
+
+ printf("<!DOCTYPE html>");
+
+ printf("<html lang=\"en\">");
+
+ printf("<head>");
+
+ printf("<meta charset=\"utf-8\">");
+ printf("<title>Sum</title>");
+
+ printf("</head>");
+
+ printf("<body>");
+
+ printf("<!-- page content -->");
+ printf("%Hello World");
+
+ printf("</body>");
+
+ printf("</html>");
 }
