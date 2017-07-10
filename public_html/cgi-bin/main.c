@@ -187,7 +187,6 @@ void WriteHTML() {
  printf("</head>");
 
  printf("<body>");
-
  printf("<!-- page content -->");
  printf("%Hello World");
 
