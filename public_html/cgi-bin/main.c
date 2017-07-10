@@ -4,7 +4,7 @@
 #include <time.h>
 #include <math.h>
 
-#define qtTeams 16
+#define qtTeams 12
 #define abbrLength 4
 
 
@@ -15,6 +15,7 @@ typedef struct {
 } Team;
 
 int Power(int, int);
+int ClosestMultipleOf(int, int);
 void InitializeTeams(Team team[], int _abbrLength, char array[][_abbrLength]);
 int ArrayContains(int x, int array[], int length);
 void ShuffleStructArray(Team array[], int length);
@@ -28,7 +29,7 @@ int main() {
   int i = 0;
   Team teams[qtTeams];
   int bets[qtTeams];
-  char teamNames[qtTeams][abbrLength] = {"TSM", "RNG", "SSG", "IMO", "FLW", "FNC", "TG2", "AHQ", "SLG", "PNG", "KBM", "KTR", "LIN", "RSS", "C9T", "TLK"};
+  char teamNames[qtTeams][abbrLength] = {"TSM", "RNG", "SSG", "IMO", "FLW", "FNC", "TG2", "AHQ", "SLG", "PNG", "KBM", "KTR"};//, "LIN", "RSS", "C9T", "TLK"};
 
   srand(time(NULL));
 
@@ -38,7 +39,7 @@ int main() {
   ShuffleStructArray(teams, qtTeams);
 
   OrganizeMatches(qtTeams, teams, 0);
-  WriteHTML();
+  //WriteHTML();
 
 
   return 0;
@@ -51,6 +52,29 @@ int Power(int a, int x) {
     result *= a;
   }
   return result;
+}
+
+int ClosestMultipleOf(int m, int r) {
+  m /= r;
+  m*= r;
+
+  return m;
+}
+
+int ClosestPowerOf2Above(int x) {
+  int n = 0, temp = 0;
+
+  temp = x;
+
+  while(x > 1) {
+    x = x >> 1;
+    n++;
+  }
+  if(temp == Power(2, n)) {
+    return Power(2, n);
+  } else {
+    return Power(2, n+1);
+  }
 }
 
 
@@ -127,48 +151,94 @@ void ShuffleStructArray(Team _array[], int length) {
 void PrintIntArray(int _array[], int length) {
   int i = 0;
   for(i = 0; i < length; i++) {
-    //printf("%d ", _array[i]);
+    printf("%d ", _array[i]);
   }
-  //printf("\n");
+  printf("\n");
 }
 
+//Sistema de disputas por eliminação simples.
 void OrganizeMatches(int lenTeams, Team _teams[], int _round) {
-  int i = 0, j = 0, k= 0, randBoolean, isFirstTeam = 1;
+  int i = 0, j = 0, k= 0, iStart, iCap, jCap, randBoolean, isFirstTeam = 1, tracker = 0, exempt = 0;
 
-  //printf("Round %d\n", _round+1);
+  exempt = ClosestPowerOf2Above(lenTeams) - lenTeams;
+
+  printf("Round %d, full tree: \n", _round);
+
+  if(_round == 0) {
+    iStart = exempt/2;
+    iCap = lenTeams-((exempt/2)+(exempt%2));
+  } else {
+    iStart = 0;
+    iCap = lenTeams;
+  }
+
 
   for(k = 0; k < lenTeams; k++) {
-    if(_round == 0) {
-      //printf("%d %s X %s %d\n", _teams[k].wins, _teams[k].name, _teams[k+1].name, _teams[k+1].wins);
-      k++;
-    } else {
+    if(_teams[k].wins == _round) {
+      if(isFirstTeam) {
+        printf("%d %s X ", _teams[k].wins, _teams[k].name);
+        isFirstTeam = !isFirstTeam;
+      } else {
+        printf("%s %d\n", _teams[k].name, _teams[k].wins);
+        isFirstTeam = !isFirstTeam;
+      }
+    }
+  }
+
+  if(_round == 0) {
+    printf("\n\n Round %d, partial tree: \n", _round);
+
+    for(k = iStart; k < iCap; k++) {
       if(_teams[k].wins == _round) {
         if(isFirstTeam) {
-          //printf("%d %s X ", _teams[k].wins, _teams[k].name);
+          printf("%d %s X ", _teams[k].wins, _teams[k].name);
           isFirstTeam = !isFirstTeam;
         } else {
-          //printf("%s %d\n", _teams[k].name, _teams[k].wins);
+          printf("%s %d\n", _teams[k].name, _teams[k].wins);
           isFirstTeam = !isFirstTeam;
         }
       }
     }
   }
 
+  printf("\niStart = %d, iCap = %d, exempt = %d", iStart, iCap, exempt);
 
-    for(i = 0; i < lenTeams; i+=Power(2, _round+1)) {
-      randBoolean = rand()%2;
-      for(j = 0; j < Power(2, _round+1); j++) {
-        if(_teams[i+j].wins == _round) {
-          _teams[i+j].wins += randBoolean;
-          randBoolean = !randBoolean;
+  for(i = 0; i < lenTeams; i+=Power(2, _round+1)) {
+    jCap = Power(2, _round+1)-((lenTeams%Power(2, _round+1))*(i == ClosestMultipleOf(lenTeams, Power(2, _round+1))));
+    // printf("i = %d ", i);
+    randBoolean = 0;
+    for(j = 0; j < jCap; j++) {
+      if(_teams[i+j].wins == _round) {
+        if(_round == 0) {
+          if(i+j < iStart || i+j >= iCap) {
+            _teams[i+j].wins += 1;
+            //printf("\n%d", i+j);
+          } else {
+            _teams[i+j].wins += randBoolean;
+            randBoolean = !randBoolean;
+          }
+        } else {
+            if(tracker < 1) {
+              _teams[i+j].wins += randBoolean;
+              randBoolean = !randBoolean;
+              tracker++;
+            } else {
+              tracker = 0;
+              _teams[i+j].wins += randBoolean;
+              i -= ((i+Power(2, _round+1))-((i+j)+1));
+              printf("\n j = %d", j);
+              break;
+            }
+          }
         }
       }
-    }
-    //printf("\n\n");
+  }
+  printf("\n\n");
 
 
-    _round++;
-    system("PAUSE");
+  _round++;
+  system("PAUSE");
+  OrganizeMatches(lenTeams, _teams, _round);
 
 }
 
