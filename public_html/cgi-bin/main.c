@@ -25,6 +25,8 @@ void OrganizeMatches(int lenTeams, Team teams[], int round);
 void WriteHTML();
 
 int main() {
+  srand(time(NULL));
+
   int i=0, qtTeams, *bets;
   Team *teams;
   char **teamNames;
@@ -40,16 +42,15 @@ int main() {
   printf("Type the quantity of teams: ");
   scanf("%d", &qtTeams);
 
-  teams = (Team *) calloc(qtTeams, sizeof(Team));
-  teamNames = (char **) calloc(qtTeams, sizeof(char));
+  teams = (Team *) malloc(qtTeams*sizeof(Team));
+  teamNames = (char **) calloc(qtTeams, sizeof(char**));
   bets = (int *) calloc(qtTeams, sizeof(int));
 
   for(i = 0; i < abbrLength; i++) {
-    teamNames[i] = (char *) calloc(abbrLength, sizeof(char));
+    teamNames[i] = (char *) malloc(abbrLength*sizeof(char));
   }
 
 
-  srand(time(NULL));
 
   GenerateTeamNames(teamNames, qtTeams);
   //InitializeTeams(teams, abbrLength, teamNames, qtTeams);
@@ -98,19 +99,21 @@ int ClosestPowerOf2Above(int x) {
 
 void GenerateTeamNames(char **_teamNames, int _qtTeams) {
   int i = 0, j = 0;
-  char randChar;
-  printf("\n%d\n", _qtTeams);
+  char randChar[abbrLength-1];
+
+  printf("\nThe %d teams are: \n", _qtTeams);
 
   for(i = 0; i < _qtTeams; i++) {
-    printf("a\n");
+    printf("Team %d: ", i);
+    randChar[0] = 'A'+rand()%26;
+    randChar[1] = 'A'+rand()%26;
+    randChar[2] = 'A'+rand()%26;
+    //printf("%c %c %c\n", randChar[0], randChar[1], randChar[2]);
     for(j = 0; j < abbrLength-1; j++) {
-       randChar = 'A';
-    //   while(j > 0 && randChar != (int)teamNames[i][j-1]) {
-    //     randChar = 65 + rand()%26;
-    //   }
-        _teamNames[i][j] = (char)randChar;
-        printf("Team %d: %s  ", i, _teamNames[i]);
+        *(&_teamNames[i]+j) = randChar[j];
+        printf("%c", *(&_teamNames[i]+j));
     }
+    printf("\n");
   }
 }
 
