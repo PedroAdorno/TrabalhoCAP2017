@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 
+#define qtTeams 16
 #define abbrLength 4
 
 
@@ -14,52 +15,31 @@ typedef struct {
 } Team;
 
 int Power(int, int);
-int ClosestMultipleOf(int, int);
-void GenerateTeamNames(char **array, int _qtTeams);
-//void InitializeTeams(Team team[], char **array, int qtTeams);
+void InitializeTeams(Team team[], int _abbrLength, char array[][_abbrLength]);
 int ArrayContains(int x, int array[], int length);
 void ShuffleStructArray(Team array[], int length);
 void InitializeIntArray(int array[], int length, int mode);
 void PrintIntArray(int array[], int length);
 void OrganizeMatches(int lenTeams, Team teams[], int round);
-void WriteHTML();
+void StartHTML();
 
 int main() {
+
+  int i = 0;
+  Team teams[qtTeams];
+  int bets[qtTeams];
+  char teamNames[qtTeams][abbrLength] = {"TSM", "RNG", "SSG", "IMO", "FLW", "FNC", "TG2", "AHQ", "SLG", "PNG", "KBM", "KTR", "LIN", "RSS", "C9T", "TLK"};
+
   srand(time(NULL));
 
-  int i=0, qtTeams, *bets;
-  Team *teams;
-  char **teamNames;
+  InitializeTeams(teams, abbrLength, teamNames);
+  InitializeIntArray(bets, qtTeams, 0);
 
-  /*char *pData = NULL;
-  char query[512] = {'\n'};
+  ShuffleStructArray(teams, qtTeams);
 
-  pData = getenv("QUERY_STRING");
-
-  if(pData != NULL) {
-    sscanf(pData, "qt_teams=%d", &qtTeams);
-  }*/
-  printf("Type the quantity of teams: ");
-  scanf("%d", &qtTeams);
-
-  teams = (Team *) malloc(qtTeams*sizeof(Team));
-  teamNames = (char **) calloc(qtTeams, sizeof(char**));
-  bets = (int *) calloc(qtTeams, sizeof(int));
-
-  for(i = 0; i < abbrLength; i++) {
-    teamNames[i] = (char *) malloc(abbrLength*sizeof(char));
-  }
-
-
-
-  GenerateTeamNames(teamNames, qtTeams);
-  //InitializeTeams(teams, abbrLength, teamNames, qtTeams);
-  // InitializeIntArray(bets, qtTeams, 0);
-  //
-  // ShuffleStructArray(teams, qtTeams);
-  //
-  // OrganizeMatches(qtTeams, teams, 0);
-  //WriteHTML();
+  StartHTML();
+  OrganizeMatches(qtTeams, teams, 0);
+  EndHTML();
 
 
   return 0;
@@ -74,52 +54,9 @@ int Power(int a, int x) {
   return result;
 }
 
-int ClosestMultipleOf(int m, int r) {
-  m /= r;
-  m*= r;
-
-  return m;
-}
-
-int ClosestPowerOf2Above(int x) {
-  int n = 0, temp = 0;
-
-  temp = x;
-
-  while(x > 1) {
-    x = x >> 1;
-    n++;
-  }
-  if(temp == Power(2, n)) {
-    return Power(2, n);
-  } else {
-    return Power(2, n+1);
-  }
-}
-
-void GenerateTeamNames(char **_teamNames, int _qtTeams) {
-  int i = 0, j = 0;
-  char randChar[abbrLength-1];
-
-  printf("\nThe %d teams are: \n", _qtTeams);
-
-  for(i = 0; i < _qtTeams; i++) {
-    printf("Team %d: ", i);
-    randChar[0] = 'A'+rand()%26;
-    randChar[1] = 'A'+rand()%26;
-    randChar[2] = 'A'+rand()%26;
-    //printf("%c %c %c\n", randChar[0], randChar[1], randChar[2]);
-    for(j = 0; j < abbrLength-1; j++) {
-        *(&_teamNames[i]+j) = randChar[j];
-        printf("%c", *(&_teamNames[i]+j));
-    }
-    printf("\n");
-  }
-}
-
 
 //Initialize the array containing all Team structs, setting each team's name and wins count(also 0).
-void InitializeTeams(Team *_teams, int columns, char *_teamNames[columns], int qtTeams) {
+void InitializeTeams(Team* _teams, int columns, char _teamNames[][columns]) {
   int i = 0;
   for(i = 0; i < qtTeams; i++) {
     strcpy(_teams[i].name, _teamNames[i]);
@@ -191,44 +128,22 @@ void ShuffleStructArray(Team _array[], int length) {
 void PrintIntArray(int _array[], int length) {
   int i = 0;
   for(i = 0; i < length; i++) {
-    printf("%d ", _array[i]);
+    //printf("%d ", _array[i]);
   }
-  printf("\n");
+  //printf("\n");
 }
 
-//Sistema de disputas por eliminação simples.
 void OrganizeMatches(int lenTeams, Team _teams[], int _round) {
-  int i = 0, j = 0, k= 0, iStart, iCap, jCap, randBoolean, isFirstTeam = 1, tracker = 0, exempt = 0;
+  int i = 0, j = 0, k= 0, randBoolean, isFirstTeam = 1;
 
-  exempt = ClosestPowerOf2Above(lenTeams) - lenTeams;
-
-  printf("Round %d, full tree: \n", _round);
-
-  if(_round == 0) {
-    iStart = exempt/2;
-    iCap = lenTeams-((exempt/2)+(exempt%2));
-  } else {
-    iStart = 0;
-    iCap = lenTeams;
-  }
-
+  printf("Round %d\n", _round+1);
 
   for(k = 0; k < lenTeams; k++) {
-    if(_teams[k].wins == _round) {
-      if(isFirstTeam) {
-        printf("%d %s X ", _teams[k].wins, _teams[k].name);
-        isFirstTeam = !isFirstTeam;
-      } else {
-        printf("%s %d\n", _teams[k].name, _teams[k].wins);
-        isFirstTeam = !isFirstTeam;
-      }
-    }
-  }
-
-  if(_round == 0) {
-    printf("\n\n Round %d, partial tree: \n", _round);
-
-    for(k = iStart; k < iCap; k++) {
+    if(_round == 0) {
+      //printf("%d %s X %s %d\n", _teams[k].wins, _teams[k].name, _teams[k+1].name, _teams[k+1].wins);
+      printf("<tr> <th> <label>Sua aposta: <input name=\"Bet%d\" type=\"number\" placeholder=\"0-1000\"></label> </th> <th> %s </th> <th> %s </th> <th><label>Sua aposta: <input name=\"Bet%d\" type=\"number\" placeholder=\"0-1000\"> </th> </tr>", k+1, _teams[k].name, _teams[k+1].name, k+2);
+      k++;
+    } else {
       if(_teams[k].wins == _round) {
         if(isFirstTeam) {
           printf("%d %s X ", _teams[k].wins, _teams[k].name);
@@ -241,68 +156,59 @@ void OrganizeMatches(int lenTeams, Team _teams[], int _round) {
     }
   }
 
-  printf("\niStart = %d, iCap = %d, exempt = %d", iStart, iCap, exempt);
 
-  for(i = 0; i < lenTeams; i+=Power(2, _round+1)) {
-    jCap = Power(2, _round+1)-((lenTeams%Power(2, _round+1))*(i == ClosestMultipleOf(lenTeams, Power(2, _round+1))));
-    // printf("i = %d ", i);
-    randBoolean = 0;
-    for(j = 0; j < jCap; j++) {
-      if(_teams[i+j].wins == _round) {
-        if(_round == 0) {
-          if(i+j < iStart || i+j >= iCap) {
-            _teams[i+j].wins += 1;
-            //printf("\n%d", i+j);
-          } else {
-            _teams[i+j].wins += randBoolean;
-            randBoolean = !randBoolean;
-          }
-        } else {
-            if(tracker < 1) {
-              _teams[i+j].wins += randBoolean;
-              randBoolean = !randBoolean;
-              tracker++;
-            } else {
-              tracker = 0;
-              _teams[i+j].wins += randBoolean;
-              i -= ((i+Power(2, _round+1))-((i+j)+1));
-              printf("\n j = %d", j);
-              break;
-            }
-          }
+    for(i = 0; i < lenTeams; i+=Power(2, _round+1)) {
+      randBoolean = rand()%2;
+      for(j = 0; j < Power(2, _round+1); j++) {
+        if(_teams[i+j].wins == _round) {
+          _teams[i+j].wins += randBoolean;
+          randBoolean = !randBoolean;
         }
       }
-  }
-  printf("\n\n");
+    }
+    //printf("\n\n");
 
 
-  _round++;
-  system("PAUSE");
-  OrganizeMatches(lenTeams, _teams, _round);
+    _round++;
+    system("PAUSE");
 
 }
 
-void WriteHTML() {
+void StartHTML() {
   printf("%s%c%c\n","Content-Type:text/html;charset=UTF-8",13,10);
 
- printf("<!DOCTYPE html>");
+  printf("<!DOCTYPE html>");
 
- printf("<html lang=\"en\">");
+  printf("<html lang=\"pt-BR\">");
 
- printf("<head>");
+  printf("<head>");
 
- printf("<meta charset=\"utf-8\">");
- printf("<title>Apostas LoL</title>");
- printf("<link href=\"home.css\" type=\"text/css\" rel=\"stylesheet\" />");
- printf("<link href=\"https://fonts.googleapis.com/css?family=Dosis\" rel=\"stylesheet\">");
+  printf("<meta charset=\"utf-8\">");
+  printf("<title>Game</title>");
+  printf("<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">");
 
- printf("</head>");
+  printf("</head>");
 
- printf("<body>");
+  printf("<body>");
+  printf("<img src=\"https://upload.wikimedia.org/wikipedia/en/6/62/League_of_Legends_Champion_Series_Logo.jpg.png\">");
+  printf("<form method=\"GET\">");
+  printf("<table border=\"1\">");
+  printf("<thead>");
+  printf("<tr><th>Valor $</th><th>Time</th><th>Time</th><th>Valor $</th></tr>");
+  printf("</thead>");
+  printf("<tbody>");
 
+}
 
+void EndHTML() {
+  printf("</tbody>");
+  printf("</table>");
+  printf("<div id=\"botao\">");
+  printf("<input type=\"submit\" name=\"botao\" value=\"GO!\" class=\"botaoEnviar\" />");
+  printf("</div>");
+  printf("</form>");
 
- printf("</body>");
+  printf("</body>");
 
- printf("</html>");
+  printf("</html>");
 }
