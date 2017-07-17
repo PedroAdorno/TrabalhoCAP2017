@@ -1,34 +1,42 @@
 body{
-	background:url(http://na.leagueoflegends.com/sites/default/files/styles/scale_xlarge/public/upload/1920_1080_2_1.jpg?itok=WXzlgv12);
-
+	background:url(http://www.rodapresamg.com.br/images/backgrounds/bg_image5.jpg);
 	background-size: cover;
 }
 
 img{
 	display: block;
-
 }
-table{
 
+*{
+	margin: auto;
+	font-family: 'Dosis', sans-serif;
+}
+
+h1{
 	text-align: center;
 	color:#E3D21E;
-	background:url(http://wallpapermonkey.com/wp-content/uploads/2016/08/blue-galaxy-wallpaper-HD1.jpg);
-	background-size:cover;
-	border-width:5px;
-	border-color: gray;http://wallpapermonkey.com/wp-content/uploads/2016/08/blue-galaxy-wallpaper-HD1.jpg
+}
 
+h3{
+	text-align: center;
+	color:#7A7D1D;
 }
 
 #botao{ text-align: center }
-.botaoEnviar{
+.botaoEnviar {
     width: 350px;
     text-align: center;
     padding: 15px 20px;
-    border: 1px solid #eee;
+    border: 4px solid #b2a518;
     border-radius: 6px;
     background-color: #E3D21E;
     font-size: 18px;
+		font-weight: 600;
 }
-*{
-	margin: auto;
+
+.botaoEnviar:hover {
+	cursor: pointer;
+	background-color: #E8DA4E;
+	font-weight: 700;
+
 }

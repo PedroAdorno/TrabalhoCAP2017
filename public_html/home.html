@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Home</title>
+	<link rel="stylesheet" type="text/css" href="home.css">
+  <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet">
+
+  <script type="text/javascript">
+  function genId() {
+  var id;
+    id = Math.floor(Math.random() * 100000);
+
+  document.getElementById("userId").value = id;
+  }
+  </script>
+
+</head>
+
+<body onload="genId()">
+	<img src="http://blackmarket.rotran.io/images/LOL_LOGOSmallTransparent.png">
+	<h1>O campeonato de League of Legends (um dos mais famosos e-sports atuais) está prestes a começar,
+	e você como um grande apostador não pode perder essa chance! </h3>
+
+	<h3>Os jogos serão disponibilizados por rodadas, coloque suas apostas e busque a maior pontuação!</h4>
+	<form method="GET">
+		<div id="botao">
+        <input type="hidden" id="userId" name="userId"/>
+        <input type="hidden" name="Bet0" value="0"/>
+        <input type="hidden" name="Bet1" value="0"/>
+        <input type="hidden" name="Bet2" value="0"/>
+        <input type="hidden" name="Bet3" value="0"/>
+        <input type="hidden" name="Bet4" value="0"/>
+        <input type="hidden" name="Bet5" value="0"/>
+        <input type="hidden" name="Bet6" value="0"/>
+        <input type="hidden" name="Bet7" value="0"/>
+        <input type="hidden" name="Bet8" value="0"/>
+        <input type="hidden" name="Bet9" value="0"/>
+        <input type="hidden" name="Bet10" value="0"/>
+        <input type="hidden" name="Bet11" value="0"/>
+        <input type="hidden" name="Bet12" value="0"/>
+        <input type="hidden" name="Bet13" value="0"/>
+        <input type="hidden" name="Bet14" value="0"/>
+        <input type="hidden" name="Bet15" value="0"/>
+        <input type="submit" value="COMEÇAR!" class="botaoEnviar" />
+    </div>
+	</form>
+
+</body>
+</html>
