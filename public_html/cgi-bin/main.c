@@ -30,10 +30,9 @@ int ArrayContains(int x, int array[], int length);
 void ShuffleStructArray(Team array[], int length);
 void InitializeIntArray(int array[], int length, int mode);
 void PrintTeamsTable(int _userID, Team _teams[qtTeams], int _round);
-int SimulateCash(int _userID, Team _teams[qtTeams], int _bets[qtTeams], int shouldSave);
 void OrganizeMatches(int _userID, Team _teams[qtTeams], int _bets[qtTeams]);
 void StartHTML(int _userId, int greedy);
-void EndHTML(int _userId);
+void EndHTML(int _userId, int _cash);
 void GreedyHTML();
 void FinishHTML(int _userId, char winner[abbrLength]);
 
@@ -71,6 +70,7 @@ int main() {
   fclose(save);
   save = NULL;
 
+
   for(i = 0; i < qtTeams; i++) {
     sum += bets[i];
     if(level.teams[winner].wins < level.teams[i].wins) {
@@ -78,32 +78,23 @@ int main() {
     }
   }
 
+  cash = GetFromSave(userId, 'c');
   _round = GetFromSave(userId, 'r');
-  cash = level.cash;
   int maxRounds = 4;
 
   if(sum <= cash) {
-    cash = SimulateCash(userId, level.teams, bets, 0);
-    if((_round < maxRounds) || (cash > 0)) {
-      FILE *savefile = fopen(filename, "rb");
-      fread(&level, sizeof(Round), 1, savefile);
-      fclose(savefile);
-      save = NULL;
-      printf("FUCKING REAL CASH IS %d", cash);
-      cash = level.cash;
-      printf("FUCKING FAKE CASH IS %d", cash);
+    if((_round < maxRounds) && (cash > 0)) {
       StartHTML(userId, 0);
       OrganizeMatches(userId, level.teams, bets);
-      EndHTML(userId);
+      EndHTML(userId, GetFromSave(userId, 'c'));
     } else {
       FinishHTML(userId, level.teams[winner].name);
     }
   } else {
     StartHTML(userId, 1);
     PrintTeamsTable(userId, level.teams, _round-1);
-    EndHTML(userId);
+    EndHTML(userId, GetFromSave(userId, 'c'));
   }
-
 
 
 
@@ -138,14 +129,13 @@ void UpdateSaveFile(int _userId, int _round, Team _teams[], int _bets[], int _ca
   strcat(filename, ".bin");
 
   FILE *file = fopen(filename, "wb");
-
   _level._round = _round;
+  _level.cash = _cash;
 
   for(i = 0; i < qtTeams; i++) {
     _level.teams[i] = _teams[i];
     _level.bets[i] = _bets[i];
   }
-  _level.cash = _cash;
 
   fwrite(&_level, sizeof(Round), 1, file);
   fclose(file);
@@ -155,6 +145,7 @@ void UpdateSaveFile(int _userId, int _round, Team _teams[], int _bets[], int _ca
 }
 
 int GetFromSave(int _userId, char mode) {
+  int compare = 0;
   char filename[11];
   Round _level;
 
@@ -273,39 +264,6 @@ void PrintTeamsTable(int _userId, Team _teams[qtTeams], int _round) {
     }
 }
 
-int SimulateCash(int _userId, Team _teams[qtTeams], int _bets[qtTeams], int shouldSave) {
-  int i = 0, j = 0, k= 0, randBoolean, _round, cash = 0;
-  Round level;
-
-  _round = GetFromSave(_userId, 'r');
-
-  cash = GetFromSave(_userId, 'c');
-
-  if(_round) {
-     for(i = 0; i < qtTeams; i+=Power(2, _round)) {
-      randBoolean = rand()%2;
-      for(j = 0; j < Power(2, _round); j++) {
-        if(_teams[i+j].wins == _round-1) {
-          _teams[i+j].wins += randBoolean;
-          randBoolean = !randBoolean;
-        }
-      }
-    }
-    for(k = 0; k < qtTeams; k++) {
-      cash -= _bets[k]*Power(-1, _teams[k].wins == _round);
-    }
-    if(shouldSave) {
-      UpdateSaveFile(_userId, _round, _teams, _bets, cash);
-    }
-  }
-
-    if(shouldSave) {
-      UpdateSaveFile(_userId, _round, _teams, _bets, cash);
-    }
-    return cash;
-
-}
-
 void OrganizeMatches(int _userId, Team _teams[qtTeams], int _bets[qtTeams]) {
   int i = 0, j = 0, k= 0, randBoolean, _round, cash;
   Round level;
@@ -331,12 +289,16 @@ void OrganizeMatches(int _userId, Team _teams[qtTeams], int _bets[qtTeams]) {
     for(k = 0; k < qtTeams; k++) {
       cash -= _bets[k]*Power(-1, _teams[k].wins == _round);
     }
-      UpdateSaveFile(_userId, _round, _teams, _bets, cash);
-      PrintTeamsTable(_userId, _teams, _round);
+    UpdateSaveFile(_userId, _round, _teams, _bets, cash);
+    PrintTeamsTable(_userId, _teams, _round);
   }
 
     _round++;
+
     UpdateSaveFile(_userId, _round, _teams, _bets, cash);
+
+
+    system("PAUSE");
 
 }
 
@@ -371,12 +333,16 @@ void StartHTML(int _userId, int greedy) {
 
 }
 
-void EndHTML(int _userId) {
+void EndHTML(int _userId, int _cash) {
   printf("</tbody>");
   printf("<tr><th>Round %d</th><th></th><th>Fundos: R$ %d</th></tr>", GetFromSave(_userId, 'r'), GetFromSave(_userId, 'c'));
   printf("</table>");
   printf("<div id=\"botao\">");
-  printf("<input type=\"submit\" value=\"GO!\" class=\"botaoEnviar\" />");
+  if(_cash) {
+    printf("<input type=\"submit\" value=\"GO!\" class=\"botaoEnviar\" />");
+  } else {
+    printf("<input type=\"submit\" value=\"Aceito a derrota\" class=\"botaoEnviar\" />");
+  }
   printf("</div>");
   printf("</form>");
 
