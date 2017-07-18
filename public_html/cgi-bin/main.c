@@ -31,26 +31,36 @@ void ShuffleStructArray(Team array[], int length);
 void InitializeIntArray(int array[], int length, int mode);
 void PrintTeamsTable(int _userID, Team _teams[qtTeams], int _round);
 void OrganizeMatches(int _userID, Team _teams[qtTeams], int _bets[qtTeams], int shouldPrint);
-void StartHTML(int _userId, int greedy);
+void StartHTML(int _userId, char mode);
 void EndHTML(int _userId, int _cash);
 void GreedyHTML();
+void InvalidInputHTML();
 void FinishHTML(int _userId, char winner[abbrLength]);
 
 int main() {
 
-  int i = 0, j = 0, _round = 0, cash = 0, userId, bets[qtTeams], sum = 0, winner = 0;
+  int i = 0, j = 0, _round = 0, cash = 0, userId, bets[qtTeams], sum = 0, winner = 0, validInputs = 0;
   Team teams[qtTeams];
   char teamNames[qtTeams][abbrLength] = {"TSM", "RNG", "SSG", "IMO", "FLW", "FNC", "TG2", "AHQ", "SLG", "PNG", "KBM", "KTR", "LIN", "RSS", "C9T", "TLK"};
-  char *data = NULL, filename[11];;
+  char *data = NULL, filename[11];
   Round level;
 
   srand(time(NULL));
 
   data = getenv("QUERY_STRING");
 
-  if(data != NULL) {
-    sscanf(data, "userId=%d&Bet0=%d&Bet1=%d&Bet2=%d&Bet3=%d&Bet4=%d&Bet5=%d&Bet6=%d&Bet7=%d&Bet8=%d&Bet9=%d&Bet10=%d&Bet11=%d&Bet12=%d&Bet13=%d&Bet14=%d&Bet15=%d", &userId, &bets[0], &bets[1], &bets[2], &bets[3], &bets[4], &bets[5], &bets[6], &bets[7], &bets[8], &bets[9], &bets[10], &bets[11], &bets[12], &bets[13], &bets[14], &bets[15]);
-  }
+  validInputs = sscanf(data, "userId=%d&Bet0=%d&Bet1=%d&Bet2=%d&Bet3=%d&Bet4=%d&Bet5=%d&Bet6=%d&Bet7=%d&Bet8=%d&Bet9=%d&Bet10=%d&Bet11=%d&Bet12=%d&Bet13=%d&Bet14=%d&Bet15=%d", &userId, &bets[0], &bets[1], &bets[2], &bets[3], &bets[4], &bets[5], &bets[6], &bets[7], &bets[8], &bets[9], &bets[10], &bets[11], &bets[12], &bets[13], &bets[14], &bets[15]);
+
+  // if(data == NULL || validInputs != qtTeams+1) {
+  //   printf("%s%c%c\n","Content-Type:text/html;charset=UTF-8",13,10);
+  //   printf("<!DOCTYPE html>");
+  //   printf("<html lang=\"pt-BR\">");
+  //   printf("<body>");
+  //   printf("<h2> Numero de entradas inválido.<br>Certifique-se de que nenhum campo está vazio.</h2>");
+  //   printf("</body>");
+  //   printf("</html>");
+  //   return 0;
+  // }
 
   if(!CheckSaveFile(userId)) {
     InitializeTeams(teams, abbrLength, teamNames);
@@ -84,7 +94,7 @@ int main() {
 
   if(sum <= cash) {
     if((_round < maxRounds) && (cash > 0)) {
-      StartHTML(userId, 0);
+      StartHTML(userId, 'n');
       OrganizeMatches(userId, level.teams, bets, 1);
       EndHTML(userId, GetFromSave(userId, 'c'));
     } else {
@@ -92,7 +102,11 @@ int main() {
       FinishHTML(userId, level.teams[winner].name);
     }
   } else {
-    StartHTML(userId, 1);
+    if(data != NULL && validInputs == qtTeams+1) {
+      StartHTML(userId, 'g');
+    } else {
+      StartHTML(userId, 'i');
+    }
     PrintTeamsTable(userId, level.teams, _round-1);
     EndHTML(userId, GetFromSave(userId, 'c'));
   }
@@ -146,7 +160,6 @@ void UpdateSaveFile(int _userId, int _round, Team _teams[], int _bets[], int _ca
 }
 
 int GetFromSave(int _userId, char mode) {
-  int compare = 0;
   char filename[11];
   Round _level;
 
@@ -297,26 +310,22 @@ void OrganizeMatches(int _userId, Team _teams[qtTeams], int _bets[qtTeams], int 
     UpdateSaveFile(_userId, _round, _teams, _bets, cash);
 }
 
-void StartHTML(int _userId, int greedy) {
+void StartHTML(int _userId, char mode) {
   printf("%s%c%c\n","Content-Type:text/html;charset=UTF-8",13,10);
-
   printf("<!DOCTYPE html>");
-
   printf("<html lang=\"pt-BR\">");
-
   printf("<head>");
-
   printf("<meta charset=\"utf-8\">");
   printf("<title>Game</title>");
   printf("<link rel=\"stylesheet\" type=\"text/css\" href=\"/~743586/game_style.css\">");
   printf("<link href=\"https://fonts.googleapis.com/css?family=Dosis\" rel=\"stylesheet\">");
-
   printf("</head>");
-
   printf("<body>");
   printf("<img src=\"https://upload.wikimedia.org/wikipedia/en/6/62/League_of_Legends_Champion_Series_Logo.jpg.png\">");
-  if(greedy) {
+  if(mode == 'g') {
     GreedyHTML();
+  } else if(mode == 'i'){
+    InvalidInputHTML();
   }
   printf("<form method=\"GET\">");
   printf("<input name=\"userId\" type=\"hidden\" value=\"%d\"/>", _userId);
@@ -325,7 +334,6 @@ void StartHTML(int _userId, int greedy) {
   printf("<tr><th>Valor R$</th><th>Time X Time</th><th>Valor R$</th></tr>");
   printf("</thead>");
   printf("<tbody>");
-
 }
 
 void EndHTML(int _userId, int _cash) {
@@ -340,19 +348,24 @@ void EndHTML(int _userId, int _cash) {
   }
   printf("</div>");
   printf("</form>");
-
+  printf("<div id=\"warning\">");
+  printf("<p>Nenhum campo deve estar vazio. Caso não queira apostar<br>em algum time, preencha seu campo com um zero.</p>");
+  printf("</div>");
   printf("</body>");
-
   printf("</html>");
 }
 
 void GreedyHTML() {
-  printf("<div id=\"wbox\">");
-  printf("<table class=\"wbx\">");
+  printf("<div id=\"wboxg\">");
   printf("<p> <strong>Você está tentando apostar mais do que possui!</strong></p>");
-  printf("</table>");
   printf("</div>");
-  printf("GREEDY EDNALDO");
+  printf("GREEDY");
+}
+
+void InvalidInputHTML() {
+  printf("<div id=\"wboxi\">");
+  printf("<p> <strong>Numero de entradas inválido.<br>Certifique-se de que nenhum campo está vazio.</strong></p>");
+  printf("</div>");
 }
 
 void FinishHTML(int _userId, char winner[4]) {

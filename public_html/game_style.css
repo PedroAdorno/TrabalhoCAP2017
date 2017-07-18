@@ -25,6 +25,19 @@ table{
 	font-weight: 700;
 }
 
+#warning {
+	margin-top: 25px;
+	text-align: center;
+	width: 350px;
+	height: auto;
+	padding: 8px;
+	border-radius: 8px;
+	border: 4px solid #b2a518;
+	background-color: #E3D21E;
+	color: #696524;
+	font-weight: 700;
+}
+
 .botaoEnviar {
     width: 350px;
 		margin-top: 25px;
@@ -62,10 +75,23 @@ input[type=number]::-webkit-outer-spin-button {
     margin: 0;
 }
 
-#wbox{
+#wboxg{
 	margin: auto;
 	text-align: center;
 	width: 200px;
+	height: auto;
+	padding: 8px;
+	border-radius: 8px;
+	border: 4px solid #e80606;
+	background-color: #E3D21E;
+	box-shadow: 0 2px 5px #000;
+	color: #b70707;
+}
+
+#wboxi{
+	margin: auto;
+	text-align: center;
+	width: 350px;
 	height: auto;
 	padding: 8px;
 	border-radius: 8px;
