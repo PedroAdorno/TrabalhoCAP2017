@@ -30,7 +30,7 @@ int ArrayContains(int x, int array[], int length);
 void ShuffleStructArray(Team array[], int length);
 void InitializeIntArray(int array[], int length, int mode);
 void PrintTeamsTable(int _userID, Team _teams[qtTeams], int _round);
-void OrganizeMatches(int _userID, Team _teams[qtTeams], int _bets[qtTeams]);
+void OrganizeMatches(int _userID, Team _teams[qtTeams], int _bets[qtTeams], int shouldPrint);
 void StartHTML(int _userId, int greedy);
 void EndHTML(int _userId, int _cash);
 void GreedyHTML();
@@ -38,7 +38,7 @@ void FinishHTML(int _userId, char winner[abbrLength]);
 
 int main() {
 
-  int i = 0, _round = 0, cash = 0, userId, bets[qtTeams], sum = 0, winner = 0;
+  int i = 0, j = 0, _round = 0, cash = 0, userId, bets[qtTeams], sum = 0, winner = 0;
   Team teams[qtTeams];
   char teamNames[qtTeams][abbrLength] = {"TSM", "RNG", "SSG", "IMO", "FLW", "FNC", "TG2", "AHQ", "SLG", "PNG", "KBM", "KTR", "LIN", "RSS", "C9T", "TLK"};
   char *data = NULL, filename[11];;
@@ -85,9 +85,10 @@ int main() {
   if(sum <= cash) {
     if((_round < maxRounds) && (cash > 0)) {
       StartHTML(userId, 0);
-      OrganizeMatches(userId, level.teams, bets);
+      OrganizeMatches(userId, level.teams, bets, 1);
       EndHTML(userId, GetFromSave(userId, 'c'));
     } else {
+      OrganizeMatches(userId, level.teams, bets, 0);
       FinishHTML(userId, level.teams[winner].name);
     }
   } else {
@@ -264,18 +265,15 @@ void PrintTeamsTable(int _userId, Team _teams[qtTeams], int _round) {
     }
 }
 
-void OrganizeMatches(int _userId, Team _teams[qtTeams], int _bets[qtTeams]) {
+void OrganizeMatches(int _userId, Team _teams[qtTeams], int _bets[qtTeams], int shouldPrint) {
   int i = 0, j = 0, k= 0, randBoolean, _round, cash;
   Round level;
 
   _round = GetFromSave(_userId, 'r');
-
-  printf("Round %d\n", _round);
-
   cash = GetFromSave(_userId, 'c');
 
   if(_round == 0) {
-    PrintTeamsTable(_userId, _teams, _round);
+      PrintTeamsTable(_userId, _teams, _round);
   } else {
      for(i = 0; i < qtTeams; i+=Power(2, _round)) {
       randBoolean = rand()%2;
@@ -290,16 +288,13 @@ void OrganizeMatches(int _userId, Team _teams[qtTeams], int _bets[qtTeams]) {
       cash -= _bets[k]*Power(-1, _teams[k].wins == _round);
     }
     UpdateSaveFile(_userId, _round, _teams, _bets, cash);
-    PrintTeamsTable(_userId, _teams, _round);
+    if(shouldPrint) {
+      PrintTeamsTable(_userId, _teams, _round);
+    }
   }
 
     _round++;
-
     UpdateSaveFile(_userId, _round, _teams, _bets, cash);
-
-
-    system("PAUSE");
-
 }
 
 void StartHTML(int _userId, int greedy) {
